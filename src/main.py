@@ -49,13 +49,13 @@
 
 # main.py
 import os
-from vector_store import DocumentProcessor, PineconeStore, ChromaStore
+from vector_store import DocumentProcessor, ChromaStore
 from chat import ChatService
 
 
 def main():
     # Initialize document processor
-
+    print("Hello")
     processor = DocumentProcessor(docs_dir="./src/scraped_docs")
     documents = processor.load_documents()
 
