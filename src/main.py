@@ -57,7 +57,7 @@ def main():
     # Initialize document processor
     print("Hello")
     processor = DocumentProcessor(docs_dir="./src/scraped_docs")
-    documents = processor.load_documents()
+    # documents = processor.load_documents()
 
     # Choose vector store
     # For Pinecone:
@@ -69,14 +69,15 @@ def main():
     vector_store = ChromaStore(db_path="./chroma_db", processor=processor)
 
     # Store documents
-    vector_store.store_documents(documents)
+    # vector_store.store_documents(documents)
 
     # Initialize chat service
     chat_service = ChatService(vector_store=vector_store)
 
     # Example usage
     # Simple query
-    question = "How to define a schema in mongoose?"
+    question = "How do I save a document in Mongoose?"
+    # question = "How to define a schema in mongoose for a dog in typescript?"
     results = vector_store.query(question)
     print("Retrieved documents:")
     for doc in results:

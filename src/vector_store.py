@@ -64,8 +64,8 @@ class DocumentProcessor:
 class ChromaStore(VectorStore):
     def __init__(self, db_path: str, processor: DocumentProcessor):
         self.client = chromadb.PersistentClient(path=db_path)
-        self.client.delete_collection("docs_collection")
-        self.collection = self.client.create_collection(name="docs_collection")
+        # self.client.delete_collection("docs_collection")
+        self.collection = self.client.get_or_create_collection(name="docs_collection")
         self.processor = processor
 
     def store_documents(self, documents: List[Dict]):
