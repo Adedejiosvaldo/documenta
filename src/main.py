@@ -76,7 +76,7 @@ def main():
 
     # Example usage
     # Simple query
-    question = "How do I save a document in Mongoose?"
+    question = "What are the schema type options in Mongoose?"
     # question = "How to define a schema in mongoose for a dog in typescript?"
     results = vector_store.query(question)
     print("Retrieved documents:")
