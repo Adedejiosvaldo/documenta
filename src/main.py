@@ -12,6 +12,9 @@ def main():
     processor = DocumentProcessor(docs_dir="./src/scraped_docs")
     # documents = processor.load_documents()
 
+# fOR faiss
+    vector_store = FAISSVectorStore(processor=processor)
+    vector_store.store_documents(documents)
 
     # For ChromaDB:
     vector_store = ChromaStore(db_path="./chroma_db", processor=processor)
