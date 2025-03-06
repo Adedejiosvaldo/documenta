@@ -1,8 +1,3 @@
-import torch
-import multiprocessing
-
-if __name__ == "__main__":
-    multiprocessing.set_start_method("spawn", force=True)
 
 from abc import ABC, abstractmethod
 import chromadb
@@ -28,13 +23,46 @@ class VectorStore(ABC):
         pass
 
 
+# class DocumentProcessor:
+#     def __init__(self, docs_dir: str, n_process=4):
+#         self.docs_dir = docs_dir
+#         self.text_splitter = RecursiveCharacterTextSplitter(
+#             chunk_size=1000, chunk_overlap=200, length_function=len
+#         )
+#         self.n_process = min(n_process, os.cpu_count() or 4)  # Safe fallback
+
+#     def load_documents(self) -> List[Dict]:
+#         """Load documents from directory and split them into chunks."""
+#         documents = []
+#         for filename in os.listdir(self.docs_dir):
+#             if filename.endswith(".txt"):
+#                 filepath = os.path.join(self.docs_dir, filename)
+#                 with open(filepath, "r", encoding="utf-8") as f:
+#                     text = f.read()
+#                     chunks = self.text_splitter.split_text(text)
+#                     for i, chunk in enumerate(chunks):
+#                         documents.append(
+#                             {
+#                                 "id": f"{filename}_{i}",
+#                                 "text": chunk,
+#                                 "metadata": {"source": filename},
+#                             }
+#                         )
+#         print(f"Loaded {len(documents)} document chunks")
+#         return documents
+
+#     def embed(self, text: str) -> List[float]:
+#         """Embed a single text chunk using LangChain's HuggingFaceEmbeddings."""
+#         return embeddings.embed_query(text)
+
+
+
 class DocumentProcessor:
-    def __init__(self, docs_dir: str, n_process=4):
+    def __init__(self, docs_dir: str):
         self.docs_dir = docs_dir
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000, chunk_overlap=200, length_function=len
         )
-        self.n_process = min(n_process, os.cpu_count() or 4)  # Safe fallback
 
     def load_documents(self) -> List[Dict]:
         """Load documents from directory and split them into chunks."""
@@ -56,9 +84,7 @@ class DocumentProcessor:
         print(f"Loaded {len(documents)} document chunks")
         return documents
 
-    def embed(self, text: str) -> List[float]:
-        """Embed a single text chunk using LangChain's HuggingFaceEmbeddings."""
-        return embeddings.embed_query(text)
+
 
 
 class ChromaStore(VectorStore):
