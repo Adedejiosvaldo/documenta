@@ -87,6 +87,48 @@ class DocumentProcessor:
 
 
 
+class FAISSVectorStore:
+    def __init__(self, processor: DocumentProcessor, index_path: str = "./faiss_index"):
+        self.processor = processor
+        self.index_path = index_path
+        self.index = None
+        self.metadata = []
+
+        # Load existing index if available
+        if os.path.exists(index_path):
+            self.index = faiss.read_index(index_path)
+            print("Loaded existing FAISS index.")
+        else:
+            self.index = faiss.IndexFlatL2(768)  # 768 is the embedding dimension
+
+    def store_documents(self, documents: List[Dict]):
+        """Embed and store documents in FAISS."""
+        print(f"Embedding and storing {len(documents)} documents...")
+        texts = [doc["text"] for doc in documents]
+        embeddings_list = [embeddings.embed_query(text) for text in texts]
+        embeddings_array = np.array(embeddings_list).astype("float32")
+
+        # Add embeddings to the FAISS index
+        self.index.add(embeddings_array)
+        self.metadata.extend(documents)
+
+        # Save the index
+        faiss.write_index(self.index, self.index_path)
+        print("Stored documents in FAISS index.")
+
+    def query(self, question: str, k: int = 3) -> List[Dict]:
+        """Retrieve top-k relevant documents for a query."""
+        query_embedding = np.array([embeddings.embed_query(question)]).astype("float32")
+        distances, indices = self.index.search(query_embedding, k)
+
+        results = []
+        for idx in indices[0]:
+            if idx < len(self.metadata):
+                results.append(self.metadata[idx])
+        return results
+
+
+
 class ChromaStore(VectorStore):
     def __init__(self, db_path: str, processor: DocumentProcessor):
         self.client = chromadb.PersistentClient(path=db_path)
