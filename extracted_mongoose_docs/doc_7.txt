@@ -1,0 +1,10 @@
+--- METADATA ---
+source: https://mongoosejs.com/docs/6.x/index.html
+timestamp: 1741902412.653258
+content_type: text/html; charset=utf-8
+last_modified: Tue, 04 Mar 2025 21:46:31 GMT
+title: Mongoose ODM v6.13.8
+language: en
+--- CONTENT ---
+
+Mongoose ODM v6.13.8 Mongoose Elegant MongoDB object modeling for Node.js Read the Docs Discover Plugins Version 6.13.8 Let's face it, writing MongoDB validation, casting and business logic boilerplate is a drag . That's why we wrote Mongoose. const mongoose = require ( 'mongoose' ); mongoose. connect ( 'mongodb://127.0.0.1:27017/test' ); const Cat = mongoose. model ( 'Cat' , { name : String }); const kitty = new Cat ({ name : 'Zildjian' }); kitty. save (). then ( () => console . log ( 'meow' )); Mongoose provides a straight-forward, schema-based solution to model your application data. It includes built-in type casting, validation, query building, business logic hooks and more, out of the box. Get Professionally Supported Mongoose Getting Started quick start guide Support Stack Overflow GitHub Issues MongoDB Support News Twitter Changelog Changelog GitHub Sponsors Sponsors Sponsor Mongoose on OpenCollective to get your company's logo above! Licensed under MIT.

@@ -1,0 +1,329 @@
+RecursiveUrlLoader
+class langchain_community.document_loaders.recursive_url_loader.RecursiveUrlLoader(url: str, max_depth: int | None = 2, use_async: bool | None = None, extractor: Callable[[str], str] | None = None, metadata_extractor: Callable[[str, str], dict] | Callable[[str, str, Response | ClientResponse], dict] | None = None, exclude_dirs: Sequence[str] | None = (), timeout: int | None = 10, prevent_outside: bool = True, link_regex: str | Pattern | None = None, headers: dict | None = None, check_response_status: bool = False, continue_on_failure: bool = True, *, base_url: str | None = None, autoset_encoding: bool = True, encoding: str | None = None, proxies: dict | None = None)[source]
+Recursively load all child links from a root URL.
+
+Security Note:
+This loader is a crawler that will start crawling at a given URL and then expand to crawl child links recursively.
+
+Web crawlers should generally NOT be deployed with network access to any internal servers.
+
+Control access to who can submit crawling requests and what network access the crawler has.
+
+While crawling, the crawler may encounter malicious URLs that would lead to a server-side request forgery (SSRF) attack.
+
+To mitigate risks, the crawler by default will only load URLs from the same domain as the start URL (controlled via prevent_outside named argument).
+
+This will mitigate the risk of SSRF attacks, but will not eliminate it.
+
+For example, if crawling a host which hosts several sites:
+
+https://some_host/alice_site/ https://some_host/bob_site/
+
+A malicious URL on Alice’s site could cause the crawler to make a malicious GET request to an endpoint on Bob’s site. Both sites are hosted on the same host, so such a request would not be prevented by default.
+
+See https://python.langchain.com/docs/security/
+
+Setup:
+
+This class has no required additional dependencies. You can optionally install beautifulsoup4 for richer default metadata extraction:
+
+pip install -U beautifulsoup4
+Instantiate:
+from langchain_community.document_loaders import RecursiveUrlLoader
+
+loader = RecursiveUrlLoader(
+    "https://docs.python.org/3.9/",
+    # max_depth=2,
+    # use_async=False,
+    # extractor=None,
+    # metadata_extractor=None,
+    # exclude_dirs=(),
+    # timeout=10,
+    # check_response_status=True,
+    # continue_on_failure=True,
+    # prevent_outside=True,
+    # base_url=None,
+    # ...
+)
+Lazy load:
+docs = []
+docs_lazy = loader.lazy_load()
+
+# async variant:
+# docs_lazy = await loader.alazy_load()
+
+for doc in docs_lazy:
+    docs.append(doc)
+print(docs[0].page_content[:100])
+print(docs[0].metadata)
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" /><
+{'source': 'https://docs.python.org/3.9/', 'content_type': 'text/html', 'title': '3.9.19 Documentation', 'language': None}
+Async load:
+docs = await loader.aload()
+print(docs[0].page_content[:100])
+print(docs[0].metadata)
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" /><
+{'source': 'https://docs.python.org/3.9/', 'content_type': 'text/html', 'title': '3.9.19 Documentation', 'language': None}
+Content parsing / extraction:
+By default the loader sets the raw HTML from each link as the Document page content. To parse this HTML into a more human/LLM-friendly format you can pass in a custom extractor method:
+
+# This example uses `beautifulsoup4` and `lxml`
+import re
+from bs4 import BeautifulSoup
+
+def bs4_extractor(html: str) -> str:
+    soup = BeautifulSoup(html, "lxml")
+    return re.sub(r"\n\n+", "\n\n", soup.text).strip()
+
+loader = RecursiveUrlLoader(
+    "https://docs.python.org/3.9/",
+    extractor=bs4_extractor,
+)
+print(loader.load()[0].page_content[:200])
+3.9.19 Documentation
+
+Download
+Download these documents
+Docs by version
+
+Python 3.13 (in development)
+Python 3.12 (stable)
+Python 3.11 (security-fixes)
+Python 3.10 (security-fixes)
+Python 3.9 (securit
+Metadata extraction:
+Similarly to content extraction, you can specify a metadata extraction function to customize how Document metadata is extracted from the HTTP response.
+
+import aiohttp
+import requests
+from typing import Union
+
+def simple_metadata_extractor(
+    raw_html: str, url: str, response: Union[requests.Response, aiohttp.ClientResponse]
+) -> dict:
+    content_type = getattr(response, "headers").get("Content-Type", "")
+    return {"source": url, "content_type": content_type}
+
+loader = RecursiveUrlLoader(
+    "https://docs.python.org/3.9/",
+    metadata_extractor=simple_metadata_extractor,
+)
+loader.load()[0].metadata
+{'source': 'https://docs.python.org/3.9/', 'content_type': 'text/html'}
+Filtering URLs:
+You may not always want to pull every URL from a website. There are four parameters that allow us to control what URLs we pull recursively. First, we can set the prevent_outside parameter to prevent URLs outside of the base_url from being pulled. Note that the base_url does not need to be the same as the URL we pass in, as shown below. We can also use link_regex and exclude_dirs to be more specific with the URLs that we select. In this example, we only pull websites from the python docs, which contain the string “index” somewhere and are not located in the FAQ section of the website.
+
+loader = RecursiveUrlLoader(
+    "https://docs.python.org/3.9/",
+    prevent_outside=True,
+    base_url="https://docs.python.org",
+    link_regex=r'<a\s+(?:[^>]*?\s+)?href="([^"]*(?=index)[^"]*)"',
+    exclude_dirs=['https://docs.python.org/3.9/faq']
+)
+docs = loader.load()
+['https://docs.python.org/3.9/',
+'https://docs.python.org/3.9/py-modindex.html',
+'https://docs.python.org/3.9/genindex.html',
+'https://docs.python.org/3.9/tutorial/index.html',
+'https://docs.python.org/3.9/using/index.html',
+'https://docs.python.org/3.9/extending/index.html',
+'https://docs.python.org/3.9/installing/index.html',
+'https://docs.python.org/3.9/library/index.html',
+'https://docs.python.org/3.9/c-api/index.html',
+'https://docs.python.org/3.9/howto/index.html',
+'https://docs.python.org/3.9/distributing/index.html',
+'https://docs.python.org/3.9/reference/index.html',
+'https://docs.python.org/3.9/whatsnew/index.html']
+Initialize with URL to crawl and any subdirectories to exclude.
+
+Parameters
+:
+url (str) – The URL to crawl.
+
+max_depth (Optional[int]) – The max depth of the recursive loading.
+
+use_async (Optional[bool]) – Whether to use asynchronous loading. If True, lazy_load function will not be lazy, but it will still work in the expected way, just not lazy.
+
+extractor (Optional[Callable[[str], str]]) – A function to extract document contents from raw HTML. When extract function returns an empty string, the document is ignored. Default returns the raw HTML.
+
+metadata_extractor (Optional[_MetadataExtractorType]) –
+
+A function to extract metadata from args: raw HTML, the source url, and the requests.Response/aiohttp.ClientResponse object (args in that order). Default extractor will attempt to use BeautifulSoup4 to extract the title, description and language of the page. ..code-block:: python
+
+import requests import aiohttp
+
+def simple_metadata_extractor(
+raw_html: str, url: str, response: Union[requests.Response, aiohttp.ClientResponse]
+
+) -> dict:
+content_type = getattr(response, “headers”).get(“Content-Type”, “”) return {“source”: url, “content_type”: content_type}
+
+exclude_dirs (Optional[Sequence[str]]) – A list of subdirectories to exclude.
+
+timeout (Optional[int]) – The timeout for the requests, in the unit of seconds. If None then connection will not timeout.
+
+prevent_outside (bool) – If True, prevent loading from urls which are not children of the root url.
+
+link_regex (Union[str, re.Pattern, None]) – Regex for extracting sub-links from the raw html of a web page.
+
+headers (Optional[dict]) – Default request headers to use for all requests.
+
+check_response_status (bool) – If True, check HTTP response status and skip URLs with error responses (400-599).
+
+continue_on_failure (bool) – If True, continue if getting or parsing a link raises an exception. Otherwise, raise the exception.
+
+base_url (Optional[str]) – The base url to check for outside links against.
+
+autoset_encoding (bool) – Whether to automatically set the encoding of the response. If True, the encoding of the response will be set to the apparent encoding, unless the encoding argument has already been explicitly set.
+
+encoding (Optional[str]) – The encoding of the response. If manually set, the encoding will be set to given value, regardless of the autoset_encoding argument.
+
+proxies (Optional[dict]) –
+
+A dictionary mapping protocol names to the proxy URLs to be used for requests. This allows the crawler to route its requests through specified proxy servers. If None, no proxies will be used and requests will go directly to the target URL. Example usage: ..code-block:: python
+
+proxies = {
+“http”: “http://10.10.1.10:3128”, “https”: “https://10.10.1.10:1080”,
+
+}
+
+Methods
+
+__init__(url[, max_depth, use_async, ...])
+
+Initialize with URL to crawl and any subdirectories to exclude.
+
+alazy_load()
+
+A lazy loader for Documents.
+
+aload()
+
+Load data into Document objects.
+
+lazy_load()
+
+Lazy load web pages.
+
+load()
+
+Load data into Document objects.
+
+load_and_split([text_splitter])
+
+Load Documents and split into chunks.
+
+__init__(url: str, max_depth: int | None = 2, use_async: bool | None = None, extractor: Callable[[str], str] | None = None, metadata_extractor: Callable[[str, str], dict] | Callable[[str, str, Response | ClientResponse], dict] | None = None, exclude_dirs: Sequence[str] | None = (), timeout: int | None = 10, prevent_outside: bool = True, link_regex: str | Pattern | None = None, headers: dict | None = None, check_response_status: bool = False, continue_on_failure: bool = True, *, base_url: str | None = None, autoset_encoding: bool = True, encoding: str | None = None, proxies: dict | None = None) → None[source]
+Initialize with URL to crawl and any subdirectories to exclude.
+
+Parameters
+:
+url (str) – The URL to crawl.
+
+max_depth (int | None) – The max depth of the recursive loading.
+
+use_async (bool | None) – Whether to use asynchronous loading. If True, lazy_load function will not be lazy, but it will still work in the expected way, just not lazy.
+
+extractor (Callable[[str], str] | None) – A function to extract document contents from raw HTML. When extract function returns an empty string, the document is ignored. Default returns the raw HTML.
+
+metadata_extractor (Callable[[str, str], dict] | Callable[[str, str, Response | ClientResponse], dict] | None) –
+
+A function to extract metadata from args: raw HTML, the source url, and the requests.Response/aiohttp.ClientResponse object (args in that order). Default extractor will attempt to use BeautifulSoup4 to extract the title, description and language of the page. ..code-block:: python
+
+import requests import aiohttp
+
+def simple_metadata_extractor(
+raw_html: str, url: str, response: Union[requests.Response, aiohttp.ClientResponse]
+
+) -> dict:
+content_type = getattr(response, “headers”).get(“Content-Type”, “”) return {“source”: url, “content_type”: content_type}
+
+exclude_dirs (Sequence[str] | None) – A list of subdirectories to exclude.
+
+timeout (int | None) – The timeout for the requests, in the unit of seconds. If None then connection will not timeout.
+
+prevent_outside (bool) – If True, prevent loading from urls which are not children of the root url.
+
+link_regex (str | Pattern | None) – Regex for extracting sub-links from the raw html of a web page.
+
+headers (dict | None) – Default request headers to use for all requests.
+
+check_response_status (bool) – If True, check HTTP response status and skip URLs with error responses (400-599).
+
+continue_on_failure (bool) – If True, continue if getting or parsing a link raises an exception. Otherwise, raise the exception.
+
+base_url (str | None) – The base url to check for outside links against.
+
+autoset_encoding (bool) – Whether to automatically set the encoding of the response. If True, the encoding of the response will be set to the apparent encoding, unless the encoding argument has already been explicitly set.
+
+encoding (str | None) – The encoding of the response. If manually set, the encoding will be set to given value, regardless of the autoset_encoding argument.
+
+proxies (dict | None) –
+
+A dictionary mapping protocol names to the proxy URLs to be used for requests. This allows the crawler to route its requests through specified proxy servers. If None, no proxies will be used and requests will go directly to the target URL. Example usage: ..code-block:: python
+
+proxies = {
+“http”: “http://10.10.1.10:3128”, “https”: “https://10.10.1.10:1080”,
+
+}
+
+Return type
+:
+None
+
+async alazy_load() → AsyncIterator[Document]
+A lazy loader for Documents.
+
+Return type
+:
+AsyncIterator[Document]
+
+async aload() → list[Document]
+Load data into Document objects.
+
+Return type
+:
+list[Document]
+
+lazy_load() → Iterator[Document][source]
+Lazy load web pages. When use_async is True, this function will not be lazy, but it will still work in the expected way, just not lazy.
+
+Return type
+:
+Iterator[Document]
+
+load() → list[Document]
+Load data into Document objects.
+
+Return type
+:
+list[Document]
+
+load_and_split(text_splitter: TextSplitter | None = None) → list[Document]
+Load Documents and split into chunks. Chunks are returned as Documents.
+
+Do not override this method. It should be considered to be deprecated!
+
+Parameters
+:
+text_splitter (Optional[TextSplitter]) – TextSplitter instance to use for splitting documents. Defaults to RecursiveCharacterTextSplitter.
+
+Returns
+:
+List of Documents.
+
+Return type
+:
+list[Document]
+
+Examples using RecursiveUrlLoader
+
+Recursive URL
