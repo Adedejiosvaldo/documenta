@@ -1,303 +1,4 @@
 
-
-# # import os
-# # import re
-# # from bs4 import BeautifulSoup
-# # import asyncio
-# # import aiohttp
-# # from langchain_community.document_loaders import RecursiveUrlLoader
-# # # import nest_asyncio
-# # # nest_asyncio.apply()
-
-# # from langchain_community.document_loaders.sitemap import SitemapLoader
-
-# # # Define a BeautifulSoup extractor to parse HTML into cleaner text
-# # def bs4_extractor(html: str) -> str:
-# #     soup = BeautifulSoup(html, "lxml")
-# #     return re.sub(r"\n\n+", "\n\n", soup.text).strip()
-
-
-
-# # loader = RecursiveUrlLoader(
-# #     "https://mongoosejs.com/docs/",
-# #     # max_depth=2,
-# #     use_async=True,
-# #     extractor=bs4_extractor,
-# #     # extractor=None,
-# #     # metadata_extractor=None,
-# #     # exclude_dirs=(),
-# #     # timeout=10,
-# #     # check_response_status=True,
-# #     # continue_on_failure=True,
-# #     # prevent_outside=True,
-# #     # base_url=None,
-# #     # ...
-# # )
-
-
-# # batch_size = 10
-# # pages = []
-# # processed_count = 0
-
-# # print("Lazy loading documents in batches of", batch_size)
-# # for doc in loader.lazy_load():
-# #     pages.append(doc)
-# #     processed_count += 1
-
-# #     if len(pages) >= batch_size:
-# #         # Process the current batch
-# #         print(f"Processing batch of {len(pages)} documents (total processed: {processed_count})")
-
-# #         # Example operation: print first 200 chars of the first document in batch
-# #         if pages:
-# #             print(f"Sample from current batch: {pages[0].page_content[:200]}...")
-
-# #         # Here you would typically do something with the pages
-# #         # For example: index.upsert(pages)
-
-# #         # Clear the batch for the next iteration
-# #         pages = []
-
-# # # Process any remaining pages in the final batch
-# # if pages:
-# #     print(f"Processing final batch of {len(pages)} documents (total processed: {processed_count})")
-# #     if pages:
-# #         print(f"Sample from final batch: {pages[0].page_content[:200]}...")
-
-# # print(pages[0].metadata)
-# # # print(pages[3].page_content[1000:3000])
-
-
-
-
-# import os
-# import re
-# from bs4 import BeautifulSoup
-# import asyncio
-# import aiohttp
-# from typing import Union, Dict, Optional
-# from langchain_community.document_loaders import RecursiveUrlLoader
-# from langchain_community.document_transformers import Html2TextTransformer
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-# import time
-# import logging
-
-# # Configure logging
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     filename='scraping.log'
-# )
-# logger = logging.getLogger('web_scraper')
-
-# # Enhanced BeautifulSoup extractor with improved text cleanup
-# def enhanced_bs4_extractor(html: str) -> str:
-#     try:
-#         soup = BeautifulSoup(html, "lxml")
-
-#         # Remove script and style elements
-#         for script_or_style in soup(["script", "style", "nav", "footer", "header"]):
-#             script_or_style.extract()
-
-#         # Get text and clean it
-#         text = soup.get_text(separator=' ', strip=True)
-
-#         # Normalize whitespace
-#         text = re.sub(r'\s+', ' ', text)
-#         text = re.sub(r'\n\n+', '\n\n', text).strip()
-
-#         return text
-#     except Exception as e:
-#         logger.error(f"Error extracting text: {e}")
-#         return ""
-
-# # Advanced metadata extraction function
-# def metadata_extractor(
-#     raw_html: str,
-#     url: str,
-#     response: Union[aiohttp.ClientResponse, any]
-# ) -> Dict:
-#     """Extract useful metadata from HTML documents"""
-#     metadata = {
-#         "source": url,
-#         "timestamp": time.time(),
-#     }
-
-#     # Extract response headers
-#     if hasattr(response, "headers"):
-#         metadata["content_type"] = response.headers.get("Content-Type", "")
-#         metadata["last_modified"] = response.headers.get("Last-Modified", "")
-
-#     # Extract more metadata using BeautifulSoup
-#     try:
-#         soup = BeautifulSoup(raw_html, "lxml")
-
-#         # Get title
-#         title_tag = soup.find("title")
-#         if title_tag and title_tag.string:
-#             metadata["title"] = title_tag.string.strip()
-
-#         # Get meta description
-#         desc_tag = soup.find("meta", attrs={"name": "description"})
-#         if desc_tag and desc_tag.get("content"):
-#             metadata["description"] = desc_tag.get("content").strip()
-
-#         # Get language
-#         html_tag = soup.find("html")
-#         if html_tag and html_tag.get("lang"):
-#             metadata["language"] = html_tag.get("lang")
-
-#         # Get canonical URL
-#         canonical = soup.find("link", attrs={"rel": "canonical"})
-#         if canonical and canonical.get("href"):
-#             metadata["canonical_url"] = canonical.get("href")
-
-#     except Exception as e:
-#         logger.error(f"Error extracting metadata: {e}")
-
-#     return metadata
-
-# # Custom headers to mimic a real browser
-# headers = {
-#     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-#     "Accept-Language": "en-US,en;q=0.5",
-#     "Connection": "keep-alive",
-#     "Upgrade-Insecure-Requests": "1",
-#     "Cache-Control": "max-age=0"
-# }
-
-# # Initialize the loader with optimized settings
-# def create_optimized_loader(url: str, max_depth: int = 2, use_pattern: Optional[str] = None) -> RecursiveUrlLoader:
-#     """Create an optimized RecursiveUrlLoader for a specific website"""
-
-#     # Configure pattern matching for specific content if provided
-#     link_pattern = None
-#     if use_pattern:
-#         link_pattern = use_pattern
-
-#     return RecursiveUrlLoader(
-#         url=url,
-#         max_depth=max_depth,  # Control crawl depth
-#         use_async=True,  # Use async for better performance
-#         extractor=enhanced_bs4_extractor,  # Use enhanced text extraction
-#         metadata_extractor=metadata_extractor,  # Extract rich metadata
-#         exclude_dirs=("login", "signup", "cart", "checkout", "profile"),  # Skip irrelevant paths
-#         timeout=15,  # Reasonable timeout
-#         prevent_outside=True,  # Stay within the same site
-#         link_regex=link_pattern,  # Optional pattern matching
-#         headers=headers,  # Set custom headers
-#         check_response_status=True,  # Skip error pages
-#         continue_on_failure=True,  # Keep going if some pages fail
-#         autoset_encoding=True,  # Handle encoding correctly
-#     )
-
-# # Process function with retries, rate limiting and error handling
-# async def process_documents(loader, batch_size=10, save_directory="extracted_data", rate_limit_delay=1.0):
-#     """Process documents with batching, rate limiting and error handling"""
-
-#     # Create directory if not exists
-#     os.makedirs(save_directory, exist_ok=True)
-
-#     pages = []
-#     processed_count = 0
-#     start_time = time.time()
-
-#     logger.info(f"Starting document extraction with batch size {batch_size}")
-
-#     # Text splitter for very large documents
-#     splitter = RecursiveCharacterTextSplitter(
-#         chunk_size=4000,
-#         chunk_overlap=200,
-#         length_function=len
-#     )
-
-#     # Process documents with async loading
-#     try:
-#         async for doc in loader.alazy_load():
-#             # Rate limiting
-#             await asyncio.sleep(rate_limit_delay)
-
-#             pages.append(doc)
-#             processed_count += 1
-
-#             # Process in batches
-#             if len(pages) >= batch_size:
-#                 await process_batch(pages, processed_count, save_directory, splitter)
-#                 pages = []  # Clear batch
-
-#         # Process any remaining pages
-#         if pages:
-#             await process_batch(pages, processed_count, save_directory, splitter)
-
-#         elapsed_time = time.time() - start_time
-#         logger.info(f"Completed processing {processed_count} documents in {elapsed_time:.2f} seconds")
-#         print(f"Successfully processed {processed_count} documents in {elapsed_time:.2f} seconds")
-
-#     except Exception as e:
-#         logger.error(f"Error in document processing: {e}")
-#         print(f"Error during processing: {e}")
-
-# async def process_batch(batch, total_processed, save_directory, splitter):
-#     """Process a batch of documents"""
-#     logger.info(f"Processing batch of {len(batch)} documents (total: {total_processed})")
-
-#     for i, doc in enumerate(batch):
-#         try:
-#             # Handle large documents by splitting if needed
-#             if len(doc.page_content) > 10000:  # Very large document
-#                 chunks = splitter.split_documents([doc])
-#                 # Process chunks as needed
-
-#             # Save to file (example action)
-#             filename = f"{save_directory}/doc_{total_processed-len(batch)+i+1}.txt"
-#             with open(filename, 'w', encoding='utf-8') as f:
-#                 # Save metadata as JSON header
-#                 f.write(f"--- METADATA ---\n")
-#                 for key, value in doc.metadata.items():
-#                     f.write(f"{key}: {value}\n")
-#                 f.write(f"--- CONTENT ---\n\n")
-#                 f.write(doc.page_content)
-
-#             # Print sample from first document in batch
-#             if i == 0:
-#                 print(f"Sample from current batch: {doc.page_content[:200]}...")
-
-#         except Exception as e:
-#             logger.error(f"Error processing document {total_processed-len(batch)+i+1}: {e}")
-
-# # Main execution
-# async def main():
-#     # Target website URL
-#     target_url = "https://mongoosejs.com/docs/"
-
-#     # Create loader
-#     loader = create_optimized_loader(
-#         url=target_url,
-#         max_depth=2  # Adjust based on site structure
-#     )
-
-#     # Process the documents
-#     await process_documents(
-#         loader=loader,
-#         batch_size=10,
-#         save_directory="extracted_mongoose_docs",
-#         rate_limit_delay=0.5  # Adjust based on server limitations
-#     )
-
-# # Run the main function
-# if __name__ == "__main__":
-#     asyncio.run(main())
-
-
-
-
-
-
-
-
-
-
 import os
 import re
 from bs4 import BeautifulSoup
@@ -312,14 +13,33 @@ import logging
 import json
 import getpass
 from langchain_core.vectorstores import VectorStore
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import  ChatOpenAI,AzureChatOpenAI,AzureOpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
+from dotenv import load_dotenv
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+
+
+load_dotenv()
+if "GOOGLE_GEMINI_API_KEY" not in os.environ:
+    os.environ["GOOGLE_GEMINI_API_KEY"] = getpass.getpass("Provide your Google API key here: ")
+
 
 # Configure API key
-if "OPENAI_API_KEY" not in os.environ:
-    os.environ["OPENAI_API_KEY"] = getpass.getpass("OpenAI API Key:")
+
+model =  ChatGoogleGenerativeAI(
+    model="gemini-1.5-pro",
+    temperature=0,
+    api_key=os.environ["GOOGLE_GEMINI_API_KEY"],
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+
+)
+
+embeddings_model  = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004",google_api_key=os.environ["GOOGLE_GEMINI_API_KEY"])
+
 
 # Configure logging
 logging.basicConfig(
@@ -558,17 +278,17 @@ def load_processed_documents(directory):
     return documents
 
 # Create vector store from documents
-def create_vector_store(documents, embeddings_model=None):
+def create_vector_store(documents, embedding_model=None):
     """Create a vector store from documents"""
-    if not embeddings_model:
-        embeddings_model = OpenAIEmbeddings()
+    if embedding_model is None:
+        embedding_model = embeddings_model
 
     from langchain_core.vectorstores import InMemoryVectorStore
 
     print(f"Creating vector store with {len(documents)} documents")
     vector_store = InMemoryVectorStore.from_documents(
         documents,
-        embeddings_model
+        embedding_model
     )
     return vector_store
 
@@ -580,17 +300,46 @@ def create_rag_chain(vector_store):
         search_kwargs={"k": 4}
     )
 
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-    template = """Answer the question based only on the following context:
 
-    {context}
+    llm = model
 
-    Question: {question}
+    # template = """Answer the question based only on the following context:
 
-    Answer the question in a comprehensive and informative way. If the information is not provided in the context, say "I don't have enough information to answer that question."
-    """
+    # {context}
 
+    # Question: {question}
+
+    # Answer the question in a comprehensive and informative way.
+    # Use the latest information available and provide a detailed explanation.
+    # Dont tell me what you have access to or not and go directly to asking the question
+    # Assume the role of a professional in the question being asked and answer as a well experienced programmer.
+    # Cover up for the lapses in the context and provide a detailed answer.
+    # However, If the information is not provided in the context and you dont know it. Be sure to say "I don't have enough information to answer that question."
+    # """
+    template = """You are an expert documentation assistant with deep technical knowledge.
+
+CONTEXT INFORMATION:
+{context}
+
+QUESTION: {question}
+
+INSTRUCTIONS:
+1. Answer ONLY based on the provided context
+2. If the context doesn't contain sufficient information, respond with: "I don't have enough information to answer that question."
+3. Format code examples with appropriate syntax highlighting
+4. When explaining technical concepts, be precise and use examples where helpful
+5. Use structured formatting (bullet points, headings, etc.) for complex explanations
+6. Cite specific sections from the context when relevant
+7. Don't mention the context itself in your answer - speak as if you inherently know the information
+8. Answer in a professional, concise manner while ensuring thoroughness
+9. For multi-part questions, address each part systematically
+10. Provide answers that would be most helpful to a developer working with this technology
+11. When asked a question outside the scope of the context, respond with: "I don't have enough information to answer that question."
+12. Only provide information that is accurate, professional and up-to-date
+
+Remember to balance technical accuracy with practical usability in your response.
+"""
     prompt = ChatPromptTemplate.from_template(template)
 
     def format_docs(docs):
@@ -636,13 +385,19 @@ def save_vector_store(vector_store, filepath):
         try:
             from langchain_community.vectorstores import FAISS
 
-            # Convert the vector store to FAISS format
-            docs = []
-            for i in range(vector_store.index.shape[0]):
-                doc = vector_store.docstore.search(str(i))
-                docs.append(doc)
+            # Get all documents directly from the vectorstore if possible
+            if hasattr(vector_store, "get_all_documents"):
+                docs = vector_store.get_all_documents()
+            # For InMemoryVectorStore, use similarity_search with empty query to get all docs
+            elif hasattr(vector_store, "similarity_search"):
+                # Use a special approach to retrieve all documents
+                # This works for InMemoryVectorStore by using maximum k (all documents)
+                docs = vector_store.similarity_search("", k=1000000)  # Set a high k to get all docs
+            else:
+                raise AttributeError("Cannot extract documents from this vector store type")
 
-            faiss_store = FAISS.from_documents(docs, OpenAIEmbeddings())
+            # Create a new FAISS store from the documents
+            faiss_store = FAISS.from_documents(docs, embeddings_model)
             faiss_store.save_local(filepath)
             print(f"Vector store converted to FAISS and saved to {filepath}")
         except Exception as e:
@@ -652,8 +407,10 @@ def save_vector_store(vector_store, filepath):
 # Main execution
 async def main():
     # Target website URL
-    target_url = "https://mongoosejs.com/docs/"
-    save_directory = "extracted_mongoose_docs"
+    target_url = "https://nextjs.org/docs"
+    # target_url = "https://mongoosejs.com/docs/"
+    save_directory = "extracted_next_docs"
+    # save_directory = "extracted_mongoose_docs"
 
     # Ask user if they want to scrape or use existing data
     if os.path.exists(save_directory) and len(os.listdir(save_directory)) > 0:
@@ -696,27 +453,27 @@ async def main():
         )
         documents = load_processed_documents(save_directory)
 
-    # Create vector store
-    vector_store = create_vector_store(documents)
 
+    # Create vector store
+    vector_store = create_vector_store(documents, embeddings_model)
     # Create RAG chain
     rag_chain = create_rag_chain(vector_store)
 
     # Demonstrate vector search
-    print("\n=== Vector Search Example ===")
-    query = "How to define a Mongoose schema"
-    retrieved_docs = vector_store.similarity_search(query, k=2)
-    print(f"Query: {query}\n")
-    for i, doc in enumerate(retrieved_docs):
-        print(f"Result {i+1} from {doc.metadata.get('source', 'unknown')}:")
-        print(f"{doc.page_content[:300]}...\n")
+    # print("\n=== Vector Search Example ===")
+    # query = "How to define a Mongoose schema"
+    # retrieved_docs = vector_store.similarity_search(query, k=2)
+    # print(f"Query: {query}\n")
+    # for i, doc in enumerate(retrieved_docs):
+    #     print(f"Result {i+1} from {doc.metadata.get('source', 'unknown')}:")
+    #     print(f"{doc.page_content[:300]}...\n")
 
     # Interactive chat session
     chat_with_documents(rag_chain)
 
     # Option to save vector store for future use
     save_choice = input("\nSave vector store for future use? [y/n]: ")
-    if save_choice.lower() == 'y':
+    if save_choice.lower() == 'y' or save_choice.lower() == 'yes':
         save_vector_store(vector_store, "mongoose_docs_vectors")
 
 # Run the main function

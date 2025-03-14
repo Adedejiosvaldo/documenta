@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/app/api-reference/config/next-config-js/appDir
+timestamp: 1741908757.7171752
+content_type: text/html; charset=utf-8
+last_modified: 
+title: next.config.js: appDir | Next.js
+description: Enable the App Router to use layouts, streaming, and more.
+language: en
+canonical_url: https://nextjs.org/docs/app/api-reference/config/next-config-js/appDir
+--- CONTENT ---
+
+next.config.js: appDir | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Configuration next.config.js appDir appDir Good to know : This option is no longer needed as of Next.js 13.4. The App Router is now stable. The App Router ( app directory ) enables support for layouts , Server Components , streaming , and colocated data fetching . Using the app directory will automatically enable React Strict Mode . Learn how to incrementally adopt app . Was this helpful? supported. Send

@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/pages/getting-started
+timestamp: 1741908740.287123
+content_type: text/html; charset=utf-8
+last_modified: 
+title: Pages Router: Getting Started | Next.js
+description: Learn how to create full-stack web applications with Next.js with the Pages Router.
+language: en
+canonical_url: https://nextjs.org/docs/pages/getting-started
+--- CONTENT ---
+
+Pages Router: Getting Started | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Introduction Pages Router Getting Started Getting Started - Pages Router Installation How to create a new Next.js application with `create-next-app`. Set up TypeScript, ESLint,and configure your `next.config.js` file. Project Structure Learn about the folder and file conventions in a Next.js project, and how to organize your project. Was this helpful? supported. Send

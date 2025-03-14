@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/app/api-reference/file-conventions
+timestamp: 1741908757.86726
+content_type: text/html; charset=utf-8
+last_modified: 
+title: API Reference: File Conventions | Next.js
+description: API Reference for Next.js File Conventions.
+language: en
+canonical_url: https://nextjs.org/docs/app/api-reference/file-conventions
+--- CONTENT ---
+
+API Reference: File Conventions | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 App Router API Reference File Conventions File Conventions default.js API Reference for the default.js file. error.js API reference for the error.js special file. forbidden.js API reference for the forbidden.js special file. instrumentation.js API reference for the instrumentation.js file. layout.js API reference for the layout.js file. loading.js API reference for the loading.js file. mdx-components.js API reference for the mdx-components.js file. middleware.js API reference for the middleware.js file. not-found.js API reference for the not-found.js file. page.js API reference for the page.js file. route.js API reference for the route.js special file. Route Segment Config Learn about how to configure options for Next.js route segments. template.js API Reference for the template.js file. unauthorized.js API reference for the unauthorized.js special file. Metadata Files API documentation for the metadata file conventions. Was this helpful? supported. Send

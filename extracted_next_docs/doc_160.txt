@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/app/api-reference/config/next-config-js/distDir
+timestamp: 1741908756.2901278
+content_type: text/html; charset=utf-8
+last_modified: 
+title: next.config.js: distDir | Next.js
+description: Set a custom build directory to use instead of the default .next directory.
+language: en
+canonical_url: https://nextjs.org/docs/app/api-reference/config/next-config-js/distDir
+--- CONTENT ---
+
+next.config.js: distDir | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Configuration next.config.js distDir distDir You can specify a name to use for a custom build directory to use instead of .next . Open next.config.js and add the distDir config: next.config.js module . exports = { distDir : 'build' , } Now if you run next build Next.js will use build instead of the default .next folder. distDir should not leave your project directory. For example, ../build is an invalid directory. Was this helpful? supported. Send

@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/pages/api-reference/cli
+timestamp: 1741908744.0710988
+content_type: text/html; charset=utf-8
+last_modified: 
+title: API Reference: CLI | Next.js
+description: API Reference for the Next.js Command Line Interface (CLI) tools.
+language: en
+canonical_url: https://nextjs.org/docs/pages/api-reference/cli
+--- CONTENT ---
+
+API Reference: CLI | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Pages Router API Reference CLI CLI Next.js comes with two Command Line Interface (CLI) tools: create-next-app : Quickly create a new Next.js application using the default template or an example from a public GitHub repository. next : Run the Next.js development server, build your application, and more. create-next-app CLI Create Next.js apps using one command with the create-next-app CLI. next CLI Learn how to run and build your application with the Next.js CLI. Was this helpful? supported. Send

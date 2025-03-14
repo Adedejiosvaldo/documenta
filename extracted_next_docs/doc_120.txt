@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/pages/api-reference/config/next-config-js/poweredByHeader
+timestamp: 1741908747.8421853
+content_type: text/html; charset=utf-8
+last_modified: 
+title: next.config.js Options: poweredByHeader | Next.js
+description: Next.js will add the `x-powered-by` header by default. Learn to opt-out of it here.
+language: en
+canonical_url: https://nextjs.org/docs/pages/api-reference/config/next-config-js/poweredByHeader
+--- CONTENT ---
+
+next.config.js Options: poweredByHeader | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Configuration next.config.js Options poweredByHeader poweredByHeader By default Next.js will add the x-powered-by header. To opt-out of it, open next.config.js and disable the poweredByHeader config: next.config.js module . exports = { poweredByHeader : false , } Was this helpful? supported. Send

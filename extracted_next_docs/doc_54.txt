@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/pages/api-reference/config/next-config-js/generateBuildId
+timestamp: 1741908742.251223
+content_type: text/html; charset=utf-8
+last_modified: 
+title: next.config.js Options: generateBuildId | Next.js
+description: Configure the build id, which is used to identify the current build in which your application is being served.
+language: en
+canonical_url: https://nextjs.org/docs/pages/api-reference/config/next-config-js/generateBuildId
+--- CONTENT ---
+
+next.config.js Options: generateBuildId | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Configuration next.config.js Options generateBuildId generateBuildId Next.js generates an ID during next build to identify which version of your application is being served. The same build should be used and boot up multiple containers. If you are rebuilding for each stage of your environment, you will need to generate a consistent build ID to use between containers. Use the generateBuildId command in next.config.js : next.config.js module . exports = { generateBuildId : async () => { // This could be anything, using the latest git hash return process . env . GIT_HASH } , } Was this helpful? supported. Send

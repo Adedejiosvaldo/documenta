@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/pages/api-reference
+timestamp: 1741908745.29195
+content_type: text/html; charset=utf-8
+last_modified: 
+title: Pages Router: API Reference | Next.js
+description: Next.js API Reference for the Pages Router.
+language: en
+canonical_url: https://nextjs.org/docs/pages/api-reference
+--- CONTENT ---
+
+Pages Router: API Reference | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Introduction Pages Router API Reference API Reference Components API Reference for Next.js built-in components in the Pages Router. Functions API Reference for Functions and Hooks in Pages Router. Configuration Learn how to configure your Next.js application. CLI API Reference for the Next.js Command Line Interface (CLI) tools. Edge Runtime API Reference for the Edge Runtime. Turbopack Turbopack is an incremental bundler optimized for JavaScript and TypeScript, written in Rust, and built into Next.js. Was this helpful? supported. Send

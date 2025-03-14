@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/architecture
+timestamp: 1741908745.2285795
+content_type: text/html; charset=utf-8
+last_modified: 
+title: Introduction: Architecture | Next.js
+description: How Next.js Works
+language: en
+canonical_url: https://nextjs.org/docs/architecture
+--- CONTENT ---
+
+Introduction: Architecture | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 Introduction Architecture Architecture Learn about the Next.js architecture and how it works under the hood. Accessibility The built-in accessibility features of Next.js. Fast Refresh Fast Refresh is a hot module reloading experience that gives you instantaneous feedback on edits made to your React components. Next.js Compiler Next.js Compiler, written in Rust, which transforms and minifies your Next.js application. Supported Browsers Browser support and which JavaScript features are supported by Next.js. Was this helpful? supported. Send

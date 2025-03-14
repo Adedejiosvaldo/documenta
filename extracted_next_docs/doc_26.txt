@@ -1,0 +1,12 @@
+--- METADATA ---
+source: https://nextjs.org/docs/app/api-reference/components
+timestamp: 1741908749.6442916
+content_type: text/html; charset=utf-8
+last_modified: 
+title: API Reference: Components | Next.js
+description: API Reference for Next.js built-in components.
+language: en
+canonical_url: https://nextjs.org/docs/app/api-reference/components
+--- CONTENT ---
+
+API Reference: Components | Next.js Menu Using App Router Features available in /app Using Latest Version 15.2.2 App Router API Reference Components Components Font Optimizing loading web fonts with the built-in `next/font` loaders. Form Learn how to use the `<Form>` component to handle form submissions and search params updates with client-side navigation. Image Optimize Images in your Next.js Application using the built-in `next/image` Component. Link Enable fast client-side navigation with the built-in `next/link` component. Script Optimize third-party scripts in your Next.js application using the built-in `next/script` Component. Was this helpful? supported. Send
